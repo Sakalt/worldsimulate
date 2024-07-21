@@ -251,25 +251,54 @@ function mergeNations() {
 }
 
 function update() {
-    moveShips();
-    war();
-    mergeNations();
+    if (!isIdleMode) {
+        // 時間の進行
+        year++;
+        if (year % 365 === 0) {
+            season++;
+            if (season > 4) {
+                season = 0;
+            }
+        }
 
-    if (season % 4 === 0) {
+        // 各国の領土拡大や船の移動、戦争などをここで処理
         nations.forEach(nation => {
-            nation.population += Math.random() * 50;
-            nation.peaceLevel += Math.random() * 10;
-            nation.strength += Math.random() * 5;
+            // 領土拡大
+            nation.expandTerritory(0.01); // 例として0.01の割合で領土拡大
+            
+            // 船の移動
+            nation.ships.forEach(ship => {
+                // ランダムに移動
+                ship.x += Math.random() * 2 - 1; // -1から1の範囲でランダムな移動
+                ship.y += Math.random() * 2 - 1;
+
+                // 移動が画面外に出ないように調整
+                if (ship.x < 0) ship.x = 0;
+                if (ship.x > canvas.width) ship.x = canvas.width;
+                if (ship.y < 0) ship.y = 0;
+                if (ship.y > canvas.height) ship.y = canvas.height;
+
+                // 他国に接触したら戦争を開始
+                nations.forEach(otherNation => {
+                    if (otherNation !== nation) {
+                        const dx = ship.x - otherNation.x;
+                        const dy = ship.y - otherNation.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < 100) { // 100px以内で戦争を開始
+                            startWar(nation, otherNation);
+                        }
+                    }
+                });
+            });
         });
-    }
 
-    if (season % 12 === 0) {
+        // 反乱処理
         rebellion();
+        // 戦争、国の合併などの処理
+        war();
+        mergeNations();
     }
-
-    year += 1;
-    season += 1;
-
+    
     draw();
     saveGame();
 }
@@ -296,5 +325,15 @@ function resetGame() {
 document.getElementById('resetButton').style.backgroundColor = '#962122';
 document.getElementById('resetButton').addEventListener('click', resetGame);
 
-init();
+let isIdleMode = false; // 放置モードの状態
+
+// 放置モードの切り替えボタンのイベントリスナー
+document.getElementById('toggleIdleMode').addEventListener('click', () => {
+    isIdleMode = !isIdleMode;
+    document.getElementById('toggleIdleMode').textContent = `放置モード: ${isIdleMode ? 'オン' : 'オフ'}`;
+});
+
+// ゲームの更新処理
 setInterval(update, 36500); // 1年 = 36.5秒
+
+init();
