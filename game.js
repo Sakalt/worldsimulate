@@ -232,27 +232,43 @@ function war() {
     });
 }
 
-function mergeNations() {
-    nations.forEach(nation => {
-        const nearbyNation = nations.find(n => n !== nation && 
-            Math.abs(n.x - nation.x) <= 100 && 
-            Math.abs(n.y - nation.y) <= 100
-        );
+function displayNotification(message) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+}
 
-        if (nearbyNation && nation.armySize > nearbyNation.armySize) {
-            nation.territory += nearbyNation.territory;
-            nation.population += nearbyNation.population;
-            nation.armySize += nearbyNation.armySize;
-            nation.exclaves = nation.exclaves.concat(nearbyNation.exclaves);
-            nations = nations.filter(n => n !== nearbyNation);
-            displayNotification(`${nation.name} が ${nearbyNation.name} を併合しました。`);
-        }
-    });
+function saveState() {
+    localStorage.setItem('nations', JSON.stringify(nations));
 }
 
 function update() {
+    year++;
+    season = (season + 1) % 4;
+
+    if (season === 0) {
+        rebellion();
+        war();
+        moveShips();
+    }
+
+    draw();
+    saveState();
+    requestAnimationFrame(update);
+}
+
+init();
+update();
+let isIdleMode = false; // 放置モードの状態
+
+// 放置モードの切り替えボタンのイベントリスナー
+document.getElementById('toggleIdleMode').addEventListener('click', () => {
+    isIdleMode = !isIdleMode;
+    document.getElementById('toggleIdleMode').textContent = `放置モード: ${isIdleMode ? 'オン' : 'オフ'}`;
+});
+
+// 更新処理関数
+function update() {
     if (!isIdleMode) {
-        // 時間の進行
         year++;
         if (year % 365 === 0) {
             season++;
@@ -261,24 +277,17 @@ function update() {
             }
         }
 
-        // 各国の領土拡大や船の移動、戦争などをここで処理
         nations.forEach(nation => {
-            // 領土拡大
             nation.expandTerritory(0.01); // 例として0.01の割合で領土拡大
-            
-            // 船の移動
             nation.ships.forEach(ship => {
-                // ランダムに移動
                 ship.x += Math.random() * 2 - 1; // -1から1の範囲でランダムな移動
                 ship.y += Math.random() * 2 - 1;
 
-                // 移動が画面外に出ないように調整
                 if (ship.x < 0) ship.x = 0;
                 if (ship.x > canvas.width) ship.x = canvas.width;
                 if (ship.y < 0) ship.y = 0;
                 if (ship.y > canvas.height) ship.y = canvas.height;
 
-                // 他国に接触したら戦争を開始
                 nations.forEach(otherNation => {
                     if (otherNation !== nation) {
                         const dx = ship.x - otherNation.x;
@@ -292,9 +301,7 @@ function update() {
             });
         });
 
-        // 反乱処理
         rebellion();
-        // 戦争、国の合併などの処理
         war();
         mergeNations();
     }
@@ -302,38 +309,3 @@ function update() {
     draw();
     saveGame();
 }
-
-function displayNotification(message) {
-    const notificationElement = document.getElementById('notification');
-    notificationElement.innerText = message;
-    setTimeout(() => {
-        notificationElement.innerText = '';
-    }, 5000);
-}
-
-function saveGame() {
-    localStorage.setItem('nations', JSON.stringify(nations));
-}
-
-function resetGame() {
-    localStorage.removeItem('nations');
-    nations = [];
-    init();
-    draw();
-}
-
-document.getElementById('resetButton').style.backgroundColor = '#962122';
-document.getElementById('resetButton').addEventListener('click', resetGame);
-
-let isIdleMode = false; // 放置モードの状態
-
-// 放置モードの切り替えボタンのイベントリスナー
-document.getElementById('toggleIdleMode').addEventListener('click', () => {
-    isIdleMode = !isIdleMode;
-    document.getElementById('toggleIdleMode').textContent = `放置モード: ${isIdleMode ? 'オン' : 'オフ'}`;
-});
-
-// ゲームの更新処理
-setInterval(update, 36500); // 1年 = 36.5秒
-
-init();
