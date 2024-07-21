@@ -5,41 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>領土戦争ゲーム</title>
     <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        #ui { position: absolute; top: 10px; left: 10px; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px; }
-        #ui input { display: block; margin-bottom: 10px; }
+        #gameCanvas {
+            border: 1px solid black;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
-    <div id="ui">
-        <h3>国を作成</h3>
-        <label>国名:
-            <input type="text" id="nationName" />
-        </label>
-        <label>戦力:
-            <input type="number" id="nationStrength" />
-        </label>
-        <label>人口:
-            <input type="number" id="nationPopulation" />
-        </label>
-        <label>平和度:
-            <input type="number" id="nationPeaceLevel" />
-        </label>
-        <label>色 (RGB):
-            <input type="number" id="nationColorR" min="0" max="255" />
-            <input type="number" id="nationColorG" min="0" max="255" />
-            <input type="number" id="nationColorB" min="0" max="255" />
-        </label>
-        <button id="createNation">国を作成</button>
-
-        <h3>国の編集</h3>
-        <label>国名:
-            <input type="text" id="editNationName" />
-        </label>
-        <button id="editNation">国を編集</button>
-    </div>
+    
+    <h2>国を作成</h2>
+    <label for="nationName">国名:</label>
+    <input type="text" id="nationName"><br>
+    <label for="nationStrength">国力:</label>
+    <input type="number" id="nationStrength" min="1"><br>
+    <label for="nationPopulation">人口:</label>
+    <input type="number" id="nationPopulation" min="1"><br>
+    <label for="nationPeaceLevel">平和度:</label>
+    <input type="number" id="nationPeaceLevel" min="0" max="100"><br>
+    <label for="nationColorR">色 (R):</label>
+    <input type="number" id="nationColorR" min="0" max="255"><br>
+    <label for="nationColorG">色 (G):</label>
+    <input type="number" id="nationColorG" min="0" max="255"><br>
+    <label for="nationColorB">色 (B):</label>
+    <input type="number" id="nationColorB" min="0" max="255"><br>
+    <label for="nationArmySize">軍隊数:</label>
+    <input type="number" id="nationArmySize" min="0"><br>
+    <button id="createNation">国を作成</button>
+    
+    <h2>国を編集</h2>
+    <label for="editNationName">国名:</label>
+    <input type="text" id="editNationName"><br>
+    <button id="editNation">国を編集</button>
+    
     <script src="game.js"></script>
 </body>
 </html>
