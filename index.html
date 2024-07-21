@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>領土戦争ゲーム</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 10px; left: 10px; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px; }
+        #ui input { display: block; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+        <h3>国を作成</h3>
+        <label>国名:
+            <input type="text" id="nationName" />
+        </label>
+        <label>戦力:
+            <input type="number" id="nationStrength" />
+        </label>
+        <label>人口:
+            <input type="number" id="nationPopulation" />
+        </label>
+        <label>平和度:
+            <input type="number" id="nationPeaceLevel" />
+        </label>
+        <label>色 (RGB):
+            <input type="number" id="nationColorR" min="0" max="255" />
+            <input type="number" id="nationColorG" min="0" max="255" />
+            <input type="number" id="nationColorB" min="0" max="255" />
+        </label>
+        <button id="createNation">国を作成</button>
+
+        <h3>国の編集</h3>
+        <label>国名:
+            <input type="text" id="editNationName" />
+        </label>
+        <button id="editNation">国を編集</button>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
