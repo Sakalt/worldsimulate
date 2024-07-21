@@ -1,264 +1,115 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = 1000;
-canvas.height = 800;
-
-const NATION_COUNT = 10;
-const nations = [];
-const syllables = ['k', 's', 't', 'm', 'y', 'r', 'w', 'h', 'g', 'z', 'd', 'p', 'ch', 'sh', 'zh'];
-const vowels = ['a', 'i', 'u', 'e', 'o', 'ea'];
-let year = 0;
-const backgroundImage = new Image();
-backgroundImage.src = '世界.png'; // 画像のパス
-
-// 画像の読み込みが成功したとき
-backgroundImage.onload = () => {
-    init(); // 画像読み込み後に国を初期化
-    gameLoop(); // ゲームループの開始
-};
-
-// 画像の読み込みが失敗したとき
-backgroundImage.onerror = () => {
-    console.error('画像の読み込みに失敗しました。');
-};
-
-// 国のデータ構造
-class Nation {
-    constructor(x, y, strength, population, peaceLevel, color, name, armySize = 0, flagSize = 50) {
-        this.x = x;
-        this.y = y;
-        this.strength = strength;
-        this.population = population;
-        this.peaceLevel = peaceLevel;
-        this.color = color;
-        this.name = name;
-        this.territory = 1;
-        this.armySize = armySize;
-        this.flagSize = flagSize;
-        this.exclaves = [];
-        this.ships = [];
-        this.generateExclave();
-    }
-
-    generateExclave() {
-        const xOffset = Math.random() * 91 - 45;
-        const yOffset = Math.random() * 91 - 45;
-        this.exclaves.push({ x: this.x + xOffset, y: this.y + yOffset });
-    }
-    
-    generateShips(number) {
-        for (let i = 0; i < number; i++) {
-            this.ships.push({
-                x: this.x + Math.random() * 50 - 25,
-                y: this.y + Math.random() * 50 - 25,
-                dx: Math.random() * 2 - 1, // 船の動きの速度
-                dy: Math.random() * 2 - 1  // 船の動きの速度
-            });
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>領土戦争ゲーム</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
         }
-    }
-}
-
-// ランダムな国名を生成する関数
-function generateRandomName() {
-    let name = '';
-    for (let i = 0; i < 3; i++) {
-        name += syllables[Math.floor(Math.random() * syllables.length)];
-        name += vowels[Math.floor(Math.random() * vowels.length)];
-    }
-    return name.charAt(0).toUpperCase() + name.slice(1);
-}
-
-// ランダムな位置を取得
-function getRandomPosition() {
-    let x, y, overlapping;
-    do {
-        x = Math.random() * (canvas.width - 50);
-        y = Math.random() * (canvas.height - 50);
-        overlapping = nations.some(nation => {
-            return x < nation.x + 50 * nation.territory &&
-                   x + 50 * nation.territory > nation.x &&
-                   y < nation.y + 50 * nation.territory &&
-                   y + 50 * nation.territory > nation.y;
-        });
-    } while (overlapping);
-    return { x, y };
-}
-
-// ゲーム初期化
-function init() {
-    nations.length = 0;
-
-    for (let i = 0; i < NATION_COUNT; i++) {
-        const { x, y } = getRandomPosition();
-        const strength = Math.random() * 100 + 1;
-        const population = Math.random() * 1000 + 100;
-        const peaceLevel = Math.random() * 100;
-        const color = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.32)`;
-        const name = generateRandomName();
-        const armySize = Math.random() * 100 + 10;
-        const flagSize = parseInt(document.getElementById('flagSize').value) || 50;
-        const shipCount = parseInt(document.getElementById('nationShips').value) || 0;
-        
-        const nation = new Nation(x, y, strength, population, peaceLevel, color, name, armySize, flagSize);
-        nation.generateShips(shipCount);
-        nations.push(nation);
-    }
-    console.log('Nations initialized:', nations);
-}
-
-// 描画
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (backgroundImage.complete) {
-        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-    } else {
-        console.error('Background image not loaded.');
-    }
-    
-    nations.forEach(nation => {
-        drawTerritory(nation);
-        
-        ctx.fillStyle = `rgba(${parseInt(nation.color.split('(')[1].split(',')[0])}, ${parseInt(nation.color.split(',')[1])}, ${parseInt(nation.color.split(',')[2])}, 0.32)`;
-        nation.exclaves.forEach(exclave => {
-            drawTerritory({ x: exclave.x, y: exclave.y, color: ctx.fillStyle });
-        });
-        
-        drawWavyFlag(nation.x + 25, nation.y + 25, nation.flagSize);
-        
-        ctx.fillStyle = '#96a3b1';
-        ctx.font = '16px Arial';
-        ctx.fillText(nation.name, nation.x + 10, nation.y + 30);
-        
-        nation.ships.forEach(ship => {
-            ctx.fillStyle = 'blue';
-            ctx.fillRect(ship.x, ship.y, 10, 5);
-        });
-    });
-}
-
-// 国土を描画する関数
-function drawTerritory(nation) {
-    const numVertices = 6 + Math.floor(Math.random() * 10);
-    const radius = 50 * nation.territory;
-    const centerX = nation.x + radius / 2;
-    const centerY = nation.y + radius / 2;
-    const angleStep = 2 * Math.PI / numVertices;
-    
-    ctx.fillStyle = nation.color;
-    ctx.beginPath();
-    
-    for (let i = 0; i < numVertices; i++) {
-        const angle = i * angleStep;
-        const xOffset = Math.random() * (radius / 2) - (radius / 4);
-        const yOffset = Math.random() * (radius / 2) - (radius / 4);
-        const x = centerX + Math.cos(angle) * (radius / 2 + xOffset);
-        const y = centerY + Math.sin(angle) * (radius / 2 + yOffset);
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
+        canvas {
+            border: 1px solid #000;
         }
-    }
-    ctx.closePath();
-    ctx.fill();
-}
-
-// 国旗を描画する関数
-function drawWavyFlag(x, y, size) {
-    ctx.fillStyle = 'yellow';
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    for (let i = 0; i < 10; i++) {
-        ctx.lineTo(x + Math.sin(i) * size, y + (i % 2 === 0 ? size / 2 : -size / 2));
-    }
-    ctx.closePath();
-    ctx.fill();
-}
-
-// 反乱のロジック
-function rebellion() {
-    nations.forEach(nation => {
-        if (nation.peaceLevel < 20) {
-            nation.population -= Math.random() * 100;
-            displayNotification(`${nation.name} で反乱が発生しました。人口が減少しました。`);
+        #controls {
+            margin: 20px;
         }
-    });
-}
-
-// 戦争のロジック
-function war() {
-    nations.forEach(attacker => {
-        attacker.ships.forEach(ship => {
-            nations.forEach(defender => {
-                if (ship.x > defender.x && ship.x < defender.x + 50 * defender.territory &&
-                    ship.y > defender.y && ship.y < defender.y + 50 * defender.territory &&
-                    attacker !== defender) {
-                    const populationLoss = Math.min(attacker.population * 0.1, 100);
-                    attacker.population -= populationLoss;
-                    defender.population -= populationLoss;
-                    displayNotification(`${attacker.name} の船が ${defender.name} に攻撃しました。人口が減少しました。`);
-                }
-            });
-        });
-    });
-}
-
-// 国を作成する関数
-function createNation() {
-    const name = document.getElementById('nationName').value || generateRandomName();
-    const strength = parseFloat(document.getElementById('nationStrength').value) || 10;
-    const population = parseFloat(document.getElementById('nationPopulation').value) || 100;
-    const peaceLevel = parseFloat(document.getElementById('nationPeaceLevel').value) || 50;
-    const r = parseInt(document.getElementById('nationColorR').value) || 0;
-    const g = parseInt(document.getElementById('nationColorG').value) || 0;
-    const b = parseInt(document.getElementById('nationColorB').value) || 0;
-    const armySize = parseFloat(document.getElementById('nationArmySize').value) || 0;
-    const shipCount = parseFloat(document.getElementById('nationShips').value) || 0;
-    const flagSize = parseInt(document.getElementById('flagSize').value) || 50;
+        .control-group {
+            margin-bottom: 10px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        button {
+            background-color: #962122;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #b23b3b;
+        }
+        #notification {
+            background-color: #ffdddd;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+        #tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 5px;
+            border-radius: 3px;
+            display: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
     
-    const color = `rgba(${r}, ${g}, ${b}, 0.32)`;
-    const { x, y } = getRandomPosition();
+    <div id="controls">
+        <div class="control-group">
+            <label for="nationName">国名:</label>
+            <input type="text" id="nationName" placeholder="国名を入力">
+        </div>
+        <div class="control-group">
+            <label for="nationStrength">国力:</label>
+            <input type="number" id="nationStrength" value="10">
+        </div>
+        <div class="control-group">
+            <label for="nationPopulation">人口:</label>
+            <input type="number" id="nationPopulation" value="100">
+        </div>
+        <div class="control-group">
+            <label for="nationPeaceLevel">平和レベル:</label>
+            <input type="number" id="nationPeaceLevel" value="50">
+        </div>
+        <div class="control-group">
+            <label for="nationColorR">色 (R):</label>
+            <input type="number" id="nationColorR" value="0" min="0" max="255">
+        </div>
+        <div class="control-group">
+            <label for="nationColorG">色 (G):</label>
+            <input type="number" id="nationColorG" value="0" min="0" max="255">
+        </div>
+        <div class="control-group">
+            <label for="nationColorB">色 (B):</label>
+            <input type="number" id="nationColorB" value="0" min="0" max="255">
+        </div>
+        <div class="control-group">
+            <label for="nationArmySize">軍隊規模:</label>
+            <input type="number" id="nationArmySize" value="0">
+        </div>
+        <div class="control-group">
+            <label for="nationShips">船の数:</label>
+            <input type="number" id="nationShips" value="0">
+        </div>
+        <div class="control-group">
+            <label for="flagSize">国旗のサイズ:</label>
+            <input type="number" id="flagSize" value="50">
+        </div>
+        <button onclick="createNation()">国を作成</button>
+        <button onclick="editNation()">国を編集</button>
+        <button onclick="resetData()">データリセット</button>
+    </div>
     
-    const nation = new Nation(x, y, strength, population, peaceLevel, color, name, armySize, flagSize);
-    nation.generateShips(shipCount);
-    nations.push(nation);
-}
-
-// 国の編集
-function editNation() {
-    const name = document.getElementById('editNationName').value;
-    const nation = nations.find(n => n.name === name);
+    <div id="notification"></div>
+    <div id="tooltip"></div>
     
-    if (nation) {
-        displayNotification(`${name} の国情報が編集されました。`);
-    } else {
-        displayNotification(`国名 ${name} は存在しません。`);
-    }
-}
-
-// 通知を表示する関数
-function displayNotification(message) {
-    const notification = document.getElementById('notification');
-    notification.textContent = message;
-    setTimeout(() => {
-        notification.textContent = '';
-    }, 3000);
-}
-
-// ゲームループ
-function gameLoop() {
-    draw();
-    rebellion();
-    war();
-    year++;
-    setTimeout(gameLoop, 1000);
-}
-
-// ゲームを開始
-function startGame() {
-    init();
-    gameLoop();
-}
-
-// 初期化とゲーム開始
-startGame();
+    <script src="game.js"></script>
+</body>
+</html>
