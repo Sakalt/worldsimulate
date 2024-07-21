@@ -219,14 +219,12 @@ function war() {
                     if (attackStrength > defendStrength) {
                         defendingNation.territory -= 1;
                         attackingNation.territory += 1;
-                        displayNotification(`${attackingNation.name} が ${defendingNation.name} を攻撃し、領土を獲得しました。`);
+                        defendingNation.population -= Math.random() * 100;
+                        attackingNation.population += Math.random() * 100;
+                        displayNotification(`${attackingNation.name} が ${defendingNation.name} を攻撃しました。`);
                     } else {
-                        attackingNation.territory -= 1;
+                        attackingNation.population -= Math.random() * 100;
                         displayNotification(`${attackingNation.name} の攻撃が失敗しました。`);
-                    }
-
-                    if (defendingNation.territory <= 0) {
-                        mergeNations(attackingNation, defendingNation);
                     }
                 }
             });
@@ -234,59 +232,69 @@ function war() {
     });
 }
 
-function mergeNations(winningNation, losingNation) {
-    winningNation.territory += losingNation.territory;
-    winningNation.exclaves.push(...losingNation.exclaves);
-    nations = nations.filter(nation => nation !== losingNation);
-    displayNotification(`${losingNation.name} は ${winningNation.name} に併合されました。`);
-}
+function mergeNations() {
+    nations.forEach(nation => {
+        const nearbyNation = nations.find(n => n !== nation && 
+            Math.abs(n.x - nation.x) <= 100 && 
+            Math.abs(n.y - nation.y) <= 100
+        );
 
-function displayNotification(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.innerText = message;
-    document.body.appendChild(notification);
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
+        if (nearbyNation && nation.armySize > nearbyNation.armySize) {
+            nation.territory += nearbyNation.territory;
+            nation.population += nearbyNation.population;
+            nation.armySize += nearbyNation.armySize;
+            nation.exclaves = nation.exclaves.concat(nearbyNation.exclaves);
+            nations = nations.filter(n => n !== nearbyNation);
+            displayNotification(`${nation.name} が ${nearbyNation.name} を併合しました。`);
+        }
+    });
 }
 
 function update() {
-    year += 1;
-    if (year % 4 === 0) {
-        season = (season + 1) % 4;
-    }
-    rebellion();
-    war();
     moveShips();
+    war();
+    mergeNations();
+
+    if (season % 4 === 0) {
+        nations.forEach(nation => {
+            nation.population += Math.random() * 50;
+            nation.peaceLevel += Math.random() * 10;
+            nation.strength += Math.random() * 5;
+        });
+    }
+
+    if (season % 12 === 0) {
+        rebellion();
+    }
+
+    year += 1;
+    season += 1;
+
     draw();
-    saveToLocalStorage();
+    saveGame();
 }
 
-function saveToLocalStorage() {
-    const nationData = nations.map(nation => ({
-        x: nation.x,
-        y: nation.y,
-        strength: nation.strength,
-        population: nation.population,
-        peaceLevel: nation.peaceLevel,
-        color: nation.color,
-        name: nation.name,
-        armySize: nation.armySize,
-        territorySize: nation.territorySize,
-        territory: nation.territory,
-        exclaves: nation.exclaves,
-        ships: nation.ships
-    }));
-    localStorage.setItem('nations', JSON.stringify(nationData));
+function displayNotification(message) {
+    const notificationElement = document.getElementById('notification');
+    notificationElement.innerText = message;
+    setTimeout(() => {
+        notificationElement.innerText = '';
+    }, 5000);
 }
 
-document.getElementById('startGame').addEventListener('click', () => {
-    init();
-    setInterval(update, 36.5 * 1000); // 1年 = 36.5秒
-});
+function saveGame() {
+    localStorage.setItem('nations', JSON.stringify(nations));
+}
 
-document.getElementById('resetGame').addEventListener('click', () => {
+function resetGame() {
     localStorage.removeItem('nations');
-    location.reload();
-});
+    nations = [];
+    init();
+    draw();
+}
+
+document.getElementById('resetButton').style.backgroundColor = '#962122';
+document.getElementById('resetButton').addEventListener('click', resetGame);
+
+init();
+setInterval(update, 36500); // 1年 = 36.5秒
