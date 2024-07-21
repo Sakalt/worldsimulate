@@ -8,46 +8,75 @@
         #gameCanvas {
             border: 1px solid black;
         }
+        #tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid black;
+            padding: 5px;
+            display: none;
+        }
         #notification {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.8);
+            background: yellow;
             border: 1px solid black;
-            border-radius: 5px;
+            padding: 5px;
             display: none;
         }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div id="tooltip"></div>
     <div id="notification"></div>
     
-    <h2>国を作成</h2>
-    <label for="nationName">国名:</label>
-    <input type="text" id="nationName"><br>
-    <label for="nationStrength">国力:</label>
-    <input type="number" id="nationStrength" min="1"><br>
-    <label for="nationPopulation">人口:</label>
-    <input type="number" id="nationPopulation" min="1"><br>
-    <label for="nationPeaceLevel">平和度:</label>
-    <input type="number" id="nationPeaceLevel" min="0" max="100"><br>
-    <label for="nationColorR">色 (R):</label>
-    <input type="number" id="nationColorR" min="0" max="255"><br>
-    <label for="nationColorG">色 (G):</label>
-    <input type="number" id="nationColorG" min="0" max="255"><br>
-    <label for="nationColorB">色 (B):</label>
-    <input type="number" id="nationColorB" min="0" max="255"><br>
-    <label for="nationArmySize">軍隊数:</label>
-    <input type="number" id="nationArmySize" min="0"><br>
-    <button id="createNation">国を作成</button>
+    <div>
+        <h3>国作成</h3>
+        <label for="nationName">国名:</label>
+        <input id="nationName" type="text">
+        <label for="nationStrength">国力:</label>
+        <input id="nationStrength" type="number" step="0.1">
+        <label for="nationPopulation">人口:</label>
+        <input id="nationPopulation" type="number" step="0.1">
+        <label for="nationPeaceLevel">平和度:</label>
+        <input id="nationPeaceLevel" type="number" step="0.1">
+        <label for="nationColorR">赤:</label>
+        <input id="nationColorR" type="number" min="0" max="255">
+        <label for="nationColorG">緑:</label>
+        <input id="nationColorG" type="number" min="0" max="255">
+        <label for="nationColorB">青:</label>
+        <input id="nationColorB" type="number" min="0" max="255">
+        <label for="nationArmySize">軍隊数:</label>
+        <input id="nationArmySize" type="number" step="0.1">
+        <label for="nationShips">船の数:</label>
+        <input id="nationShips" type="number" step="1">
+        <label for="flagSize">国旗サイズ:</label>
+        <input id="flagSize" type="number" step="1">
+        <button id="createNation">国作成</button>
+    </div>
     
-    <h2>国を編集</h2>
-    <label for="editNationName">国名:</label>
-    <input type="text" id="editNationName"><br>
-    <button id="editNation">国を編集</button>
+    <div>
+        <h3>国の編集</h3>
+        <label for="editNationName">国名:</label>
+        <input id="editNationName" type="text">
+        <label for="editNationStrength">国力:</label>
+        <input id="editNationStrength" type="number" step="0.1">
+        <label for="editNationPopulation">人口:</label>
+        <input id="editNationPopulation" type="number" step="0.1">
+        <label for="editNationPeaceLevel">平和度:</label>
+        <input id="editNationPeaceLevel" type="number" step="0.1">
+        <label for="editNationColorR">赤:</label>
+        <input id="editNationColorR" type="number" min="0" max="255">
+        <label for="editNationColorG">緑:</label>
+        <input id="editNationColorG" type="number" min="0" max="255">
+        <label for="editNationColorB">青:</label>
+        <input id="editNationColorB" type="number" min="0" max="255">
+        <label for="editNationArmySize">軍隊数:</label>
+        <input id="editNationArmySize" type="number" step="0.1">
+        <label for="editFlagSize">国旗サイズ:</label>
+        <input id="editFlagSize" type="number" step="1">
+        <button id="editNation">国編集</button>
+    </div>
     
-    <script src="game.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
