@@ -1,7 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 1000; // 背景画像の幅に合わせる
+canvas.height = 800; // 背景画像の高さに合わせる
 
 const NATION_COUNT = 10;
 const nations = [];
@@ -10,7 +10,7 @@ const vowels = ['a', 'i', 'u', 'e', 'o', 'ea'];
 let year = 0;
 let season = 0;
 const backgroundImage = new Image();
-backgroundImage.src = '世界.png';
+backgroundImage.src = '世界.png'; // 背景画像のパス
 
 // 国のデータ構造
 class Nation {
@@ -39,8 +39,8 @@ function generateRandomName() {
 // 初期化
 function init() {
     for (let i = 0; i < NATION_COUNT; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
+        const x = Math.random() * (canvas.width - 50); // キャンバス内に収めるための調整
+        const y = Math.random() * (canvas.height - 50); // キャンバス内に収めるための調整
         const strength = Math.random() * 100 + 1;
         const population = Math.random() * 1000 + 100;
         const peaceLevel = Math.random() * 100;
@@ -119,8 +119,8 @@ function createNation() {
     const color = `rgba(${colorR}, ${colorG}, ${colorB}, 0.32)`;
 
     // 国の位置はランダムで設定
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
+    const x = Math.random() * (canvas.width - 50);
+    const y = Math.random() * (canvas.height - 50);
 
     // 新しい国を追加
     nations.push(new Nation(x, y, strength, population, peaceLevel, color, name));
@@ -132,8 +132,8 @@ function editNation() {
     const nation = nations.find(n => n.name === name);
 
     if (nation) {
-        nation.x = Math.random() * canvas.width;
-        nation.y = Math.random() * canvas.height;
+        nation.x = Math.random() * (canvas.width - 50);
+        nation.y = Math.random() * (canvas.height - 50);
         nation.strength = Math.random() * 100 + 1;
         nation.population = Math.random() * 1000 + 100;
         nation.peaceLevel = Math.random() * 100;
