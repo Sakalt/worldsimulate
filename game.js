@@ -5,7 +5,6 @@ canvas.height = 800;
 
 const NATION_COUNT = 10;
 let nations = [];
-const ships = [];
 const syllables = ['k', 's', 't', 'm', 'y', 'r', 'w', 'h', 'g', 'z', 'd', 'p', 'ch', 'sh', 'zh'];
 const vowels = ['a', 'i', 'u', 'e', 'o', 'ea'];
 let year = 0;
@@ -242,37 +241,11 @@ function saveState() {
 }
 
 function update() {
-    year++;
-    season = (season + 1) % 4;
-
-    if (season === 0) {
-        rebellion();
-        war();
-        moveShips();
-    }
-
-    draw();
-    saveState();
-    requestAnimationFrame(update);
-}
-
-init();
-update();
-let isIdleMode = false; // 放置モードの状態
-
-// 放置モードの切り替えボタンのイベントリスナー
-document.getElementById('toggleIdleMode').addEventListener('click', () => {
-    isIdleMode = !isIdleMode;
-    document.getElementById('toggleIdleMode').textContent = `放置モード: ${isIdleMode ? 'オン' : 'オフ'}`;
-});
-
-// 更新処理関数
-function update() {
     if (!isIdleMode) {
         year++;
         if (year % 365 === 0) {
             season++;
-            if (season > 4) {
+            if (season > 3) { // 4つの季節に修正
                 season = 0;
             }
         }
@@ -294,7 +267,7 @@ function update() {
                         const dy = ship.y - otherNation.y;
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         if (distance < 100) { // 100px以内で戦争を開始
-                            startWar(nation, otherNation);
+                            war(); // 修正: 戦争処理を呼び出し
                         }
                     }
                 });
@@ -303,9 +276,21 @@ function update() {
 
         rebellion();
         war();
-        mergeNations();
+        moveShips();
     }
     
     draw();
-    saveGame();
+    saveState();
+    requestAnimationFrame(update);
 }
+
+init();
+update();
+
+let isIdleMode = false; // 放置モードの状態
+
+// 放置モードの切り替えボタンのイベントリスナー
+document.getElementById('toggleIdleMode').addEventListener('click', () => {
+    isIdleMode = !isIdleMode;
+    document.getElementById('toggleIdleMode').textContent = `放置モード: ${isIdleMode ? 'オン' : 'オフ'}`;
+});
