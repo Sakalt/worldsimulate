@@ -11,7 +11,12 @@ const vowels = ['a', 'i', 'u', 'e', 'o', 'ea'];
 let year = 0;
 let season = 0;
 const backgroundImage = new Image();
-backgroundImage.src = '世界.png';
+const backgroundImage = new Image();
+backgroundImage.src = '世界.png'; // 画像のパス
+backgroundImage.onload = () => {
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+};
+
 
 // 国のデータ構造
 class Nation {
